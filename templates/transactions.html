@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Transaction List</h1>
+    </header>
+
+    <main>
+        <form action="/transactions" method="get">
+            <div>
+                <label for="category">Category:</label>
+                <input type="text" name="category" id="category" placeholder="Category">
+            </div>
+            <div>
+                <label for="start_date">Start Date:</label>
+                <input type="date" name="start_date" id="start_date">
+            </div>
+            <div>
+                <label for="end_date">End Date:</label>
+                <input type="date" name="end_date" id="end_date">
+            </div>
+            <div>
+                <label for="type">Type:</label>
+                <select name="type" id="type">
+                    <option value="">All</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+            <button type="submit">Filter</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions.items %}
+                <tr>
+                    <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ transaction.category }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if transactions.has_prev %}
+            <a href="{{ url_for('transactions', page=transactions.prev_num) }}">Previous</a>
+            {% endif %}
+            {% if transactions.has_next %}
+            <a href="{{ url_for('transactions', page=transactions.next_num) }}">Next</a>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <span>&copy; 2024 Personal Finance Tracker</span>
+            <span>Version 1.0.0</span>
+            <a href="/help">Help</a>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

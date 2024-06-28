@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Onboarding - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to Personal Finance Tracker</h1>
+    </header>
+
+    <main>
+        <section id="welcome-screen" class="onboarding-section">
+            <h2>Welcome!</h2>
+            <p>Get started by setting up your financial goals and information.</p>
+            <button onclick="showNextSection('financial-goals')">Start Setup</button>
+        </section>
+
+        <section id="financial-goals" class="onboarding-section" style="display:none;">
+            <h2>Financial Goals</h2>
+            <p>Describe your financial goals:</p>
+            <input type="text" id="financial-goal-input" placeholder="E.g., Saving for a down payment">
+            <p>Or select from pre-defined goals:</p>
+            <select id="predefined-goals">
+                <option value="">Select a goal...</option>
+                <option value="emergency-fund">Emergency Fund</option>
+                <option value="vacation">Vacation</option>
+                <option value="retirement">Retirement</option>
+                <option value="down-payment">Down Payment</option>
+            </select>
+            <button onclick="showNextSection('income-information')">Next</button>
+        </section>
+
+        <section id="income-information" class="onboarding-section" style="display:none;">
+            <h2>Income Information</h2>
+            <label for="monthly-income">Monthly Income:</label>
+            <input type="number" id="monthly-income" placeholder="E.g., 5000">
+            <label for="income-frequency">Income Frequency:</label>
+            <select id="income-frequency">
+                <option value="monthly">Monthly</option>
+                <option value="bi-weekly">Bi-weekly</option>
+                <option value="weekly">Weekly</option>
+            </select>
+            <button onclick="showNextSection('expense-categories')">Next</button>
+        </section>
+
+        <section id="expense-categories" class="onboarding-section" style="display:none;">
+            <h2>Expense Categories</h2>
+            <p>Select your expense categories:</p>
+            <label><input type="checkbox" value="housing"> Housing</label>
+            <label><input type="checkbox" value="transportation"> Transportation</label>
+            <label><input type="checkbox" value="food"> Food</label>
+            <label><input type="checkbox" value="entertainment"> Entertainment</label>
+            <label><input type="checkbox" value="utilities"> Utilities</label>
+            <label><input type="checkbox" value="healthcare"> Healthcare</label>
+            <label><input type="checkbox" value="insurance"> Insurance</label>
+            <button onclick="showNextSection('financial-priorities')">Next</button>
+        </section>
+
+        <section id="financial-priorities" class="onboarding-section" style="display:none;">
+            <h2>Financial Priorities</h2>
+            <p>Rank your financial priorities:</p>
+            <ol>
+                <li><input type="text" placeholder="1st Priority"></li>
+                <li><input type="text" placeholder="2nd Priority"></li>
+                <li><input type="text" placeholder="3rd Priority"></li>
+                <li><input type="text" placeholder="4th Priority"></li>
+                <li><input type="text" placeholder="5th Priority"></li>
+            </ol>
+            <button onclick="submitOnboarding()">Finish Setup</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <span>&copy; 2024 Personal Finance Tracker</span>
+            <span>Version 1.0.0</span>
+            <a href="/help">Help</a>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

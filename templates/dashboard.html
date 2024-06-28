@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Personal Finance Tracker</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="user-profile">
+                <img src="/static/user-profile.png" alt="User Profile" class="profile-pic">
+                <span class="username">John Doe</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="/">Home</a>
+                <a href="/settings">Settings</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="main-section">
+            <div class="chart-placeholder">
+                <h2>Income vs. Expenses</h2>
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+            <div class="net-worth">
+                <h2>Net Worth</h2>
+                <div class="net-worth-value">$10,000</div>
+            </div>
+            <div class="quick-links">
+                <h2>Quick Links</h2>
+                <button onclick="location.href='/add-transaction'">Add Transaction</button>
+                <button onclick="location.href='/view-budget'">View Budget</button>
+                <button onclick="location.href='/savings-goal-tracker'">Savings Goal Tracker</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <span>&copy; 2024 Personal Finance Tracker</span>
+            <span>Version 1.0.0</span>
+            <a href="/help">Help</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
