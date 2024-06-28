@@ -9,5 +9,5 @@ function showNextSection(nextSectionId) {
 function submitOnboarding() {
     // Placeholder for form submission logic
     alert('Onboarding completed! Redirecting to dashboard...');
-    window.location.href = '/';
+    window.location.href = '/dashboard';
 }

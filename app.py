@@ -1,42 +1,124 @@
-from flask import Flask, render_template, request, redirect, url_for
-from models import db, User, Transaction
+# from flask import Flask, render_template, request, redirect, url_for, session
+# from models import User, Transaction
+
+# app = Flask(__name__)
+# app.config['SECRET_KEY'] = 'your_secret_key'
+
+# @app.route('/')
+# def home():
+#     if 'user_id' in session:
+#         return redirect(url_for('dashboard'))
+#     else:
+#         return redirect(url_for('onboarding'))
+
+
+# @app.route('dashboard/')
+# def dashboard():
+#     # Replace with actual user handling logic
+#     user_id = 1
+#     transactions = Transaction.get_transactions(user_id)
+#     return render_template('dashboard.html', transactions=transactions)
+
+# @app.route('/onboarding', methods=['GET','POST'])
+# def onboarding():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         financial_goals = request.form.get('financial-goal') or request.form.get('predefined-goals')
+#         monthly_income = request.form.get('monthly-income')
+#         income_frequency = request.form.get('income-frequency')
+#         expense_categories = ','.join(request.form.getlist('expense-categories'))
+#         financial_priorities = ','.join(request.form.getlist('financial-priorities'))
+
+#         conn = get_db_connection()
+#         conn.execute('INSERT INTO User (username, financial_goals, monthly_income, income_frequency, expense_categories, financial_priorities) VALUES (?, ?, ?, ?, ?, ?)',
+#                      (username, financial_goals, monthly_income, income_frequency, expense_categories, financial_priorities))
+#         conn.commit()
+#         user_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+#         conn.close()
+
+#         session['user_id'] = user_id
+#         return redirect(url_for('dashboard'))
+#     return render_template('onboarding.html')
+
+# @app.route('/add-transaction', methods=['GET', 'POST'])
+# def add_transaction():
+#     if request.method == 'POST':
+#         user_id = 1  # Replace with actual user handling logic
+#         category = request.form['category']
+#         description = request.form['description']
+#         amount = float(request.form['amount'])
+#         transaction_type = request.form['type']
+#         date = request.form['date']
+
+#         transaction = Transaction(user_id=user_id, category=category, description=description,
+#                                   amount=amount, type=transaction_type, date=date)
+#         transaction.save()
+
+#         return redirect(url_for('dashboard'))
+
+#     return render_template('add_transaction.html')
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+
+from flask import Flask, render_template, request, redirect, url_for, session
+import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/finance_tracker.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'your_secret_key'
 
-db.init_app(app)
+def get_db_connection():
+    conn = sqlite3.connect('db/finance_tracker.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 @app.route('/')
+def home():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('onboarding'))
+
+@app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    if 'user_id' not in session:
+        return redirect(url_for('onboarding'))
 
-@app.route('/onboarding')
+    user_id = session['user_id']
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM User WHERE id = ?', (user_id,)).fetchone()
+    conn.close()
+    return render_template('dashboard.html', user=user)
+
+@app.route('/onboarding', methods=['GET', 'POST'])
 def onboarding():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        financial_goals = request.form.get('financial-goal') or request.form.get('predefined-goals')
+        monthly_income = request.form.get('monthly-income')
+        income_frequency = request.form.get('income-frequency')
+        expense_categories = ','.join(request.form.getlist('expense-categories'))
+        financial_priorities = ','.join(request.form.getlist('financial-priorities'))
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO User (username, financial_goals, monthly_income, income_frequency, expense_categories, financial_priorities) VALUES (?, ?, ?, ?, ?, ?)',
+                     (username, financial_goals, monthly_income, income_frequency, expense_categories, financial_priorities))
+        conn.commit()
+        user_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        conn.close()
+
+        session['user_id'] = user_id
+        return redirect(url_for('dashboard'))
     return render_template('onboarding.html')
-
-@app.route('/submit-onboarding', methods=['POST'])
-def submit_onboarding():
-    username = "John Doe"  # Replace this with actual user handling logic
-    financial_goals = request.form.get('financial-goal') or request.form.get('predefined-goals')
-    monthly_income = request.form.get('monthly-income')
-    income_frequency = request.form.get('income-frequency')
-    expense_categories = ','.join(request.form.getlist('expense-categories'))
-    financial_priorities = ','.join(request.form.getlist('financial-priorities'))
-
-    user = User(username=username, financial_goals=financial_goals, monthly_income=monthly_income,
-                income_frequency=income_frequency, expense_categories=expense_categories,
-                financial_priorities=financial_priorities)
-    
-    db.session.add(user)
-    db.session.commit()
-
-    return redirect(url_for('dashboard'))
 
 @app.route('/transactions')
 def transactions():
-    # Get filter parameters from query string
+    if 'user_id' not in session:
+        return redirect(url_for('onboarding'))
+
+    user_id = session['user_id']
     category = request.args.get('category')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -44,41 +126,52 @@ def transactions():
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
-    # Query the database with filters
-    query = Transaction.query
+    query = 'SELECT * FROM "Transaction" WHERE user_id = ?'
+    params = [user_id]
+
     if category:
-        query = query.filter_by(category=category)
+        query += ' AND category = ?'
+        params.append(category)
     if start_date:
-        query = query.filter(Transaction.date >= datetime.strptime(start_date, '%Y-%m-%d'))
+        query += ' AND date >= ?'
+        params.append(start_date)
     if end_date:
-        query = query.filter(Transaction.date <= datetime.strptime(end_date, '%Y-%m-%d'))
+        query += ' AND date <= ?'
+        params.append(end_date)
     if type_filter:
-        query = query.filter_by(type=type_filter)
+        query += ' AND type = ?'
+        params.append(type_filter)
 
-    transactions = query.paginate(page, per_page, False)
+    conn = get_db_connection()
+    transactions = conn.execute(query, params).fetchall()
+    conn.close()
 
-    return render_template('transactions.html', transactions=transactions)
+    return render_template('transactions.html', transactions=transactions, page=page, per_page=per_page)
 
 @app.route('/add-transaction', methods=['GET', 'POST'])
 def add_transaction():
+    if 'user_id' not in session:
+        return redirect(url_for('onboarding'))
+
     if request.method == 'POST':
+        user_id = session['user_id']
         date = datetime.strptime(request.form['date'], '%Y-%m-%d')
         category = request.form['category']
         description = request.form['description']
         amount = float(request.form['amount'])
         type = request.form['type']
 
-        # Replace with actual user handling logic
-        user_id = 1  
-        
-        transaction = Transaction(user_id=user_id, date=date, category=category, description=description,
-                                  amount=amount, type=type)
-        db.session.add(transaction)
-        db.session.commit()
+        conn = get_db_connection()
+        conn.execute('INSERT INTO "Transaction" (user_id, date, category, description, amount, type) VALUES (?, ?, ?, ?, ?, ?)',
+                     (user_id, date, category, description, amount, type))
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('transactions'))
 
     return render_template('add_transaction.html')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
